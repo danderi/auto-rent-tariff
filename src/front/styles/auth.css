@@ -1,0 +1,159 @@
+/* src/front/styles/auth.css */
+
+@import './variables.css';
+
+/* Contenedor principal para Login y Signup */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-card {
+    background-color: var(--card-background-color);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+}
+
+.auth-card h4 {
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.auth-card .form-label {
+    color: var(--text-color);
+}
+
+.auth-card .form-control {
+    background-color: var(--input-background-color);
+    color: var(--input-text-color);
+    border: 1px solid #ced4da;
+}
+
+.auth-card .form-control:focus {
+    background-color: var(--input-background-color);
+    color: var(--input-text-color);
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.auth-card .btn-primary {
+    background-color: var(--button-background-color);
+    border: none;
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    color: var(--button-text-color);
+}
+
+.auth-card .btn-primary:hover {
+    background-color: darken(var(--button-background-color), 10%);
+}
+
+.auth-card .invalid-feedback {
+    color: var(--invalid-feedback-color);
+}
+
+.auth-card .alert-danger {
+    color: var(--alert-text-color);
+    background-color: var(--alert-background-color);
+    border-color: var(--alert-background-color);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-footer a {
+    color: var(--button-background-color);
+}
+
+.auth-footer a:hover {
+    color: darken(var(--button-background-color), 10%);
+}
+
+.dot-flashing-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dot-flashing {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    margin: 0 5px;
+    border-radius: 50%;
+    background-color: var(--button-background-color);
+    animation: dot-flashing 1s infinite linear alternate;
+}
+
+.dot-flashing::before,
+.dot-flashing::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--button-background-color);
+}
+
+.dot-flashing::before {
+    left: -20px;
+    animation: dot-flashing 1s infinite linear alternate;
+    animation-delay: -.33s;
+}
+
+.dot-flashing::after {
+    left: 20px;
+    animation: dot-flashing 1s infinite linear alternate;
+    animation-delay: 0.33s;
+}
+
+@keyframes dot-flashing {
+    0% {
+        background-color: var(--button-background-color);
+    }
+    50%,
+    100% {
+        background-color: var(--text-color);
+    }
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #bdbfc1;
+}
+
+.password-strength {
+    height: 5px;
+    background-color: #ddd;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.password-strength-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-recommendations {
+    font-size: 0.875rem;
+    color: #6c757d;
+}

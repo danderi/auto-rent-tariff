@@ -1,0 +1,11 @@
+/* src/front/styles/index.css */
+
+@import './variables.css';
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}

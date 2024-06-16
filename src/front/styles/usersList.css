@@ -1,0 +1,51 @@
+/* src/front/styles/usersList.css */
+
+@import './variables.css';
+
+/* Contenedor principal para la lista de usuarios */
+.users-list {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--card-background-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Título de la lista de usuarios */
+.users-list h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+/* Lista de usuarios */
+.users-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+/* Elementos de la lista de usuarios */
+.users-list li {
+    background-color: var(--list-item-bg-color);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    color: var(--text-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Información del usuario */
+.users-list li p {
+    margin: 5px 0;
+}
+
+.users-list li p strong {
+    color: var(--highlight-color);
+}
+
+/* Mensaje cuando no hay usuarios */
+.users-list p {
+    text-align: center;
+    color: var(--text-color);
+}

@@ -1,0 +1,29 @@
+/* Variables para el modo claro */
+:root {
+  --background-color: #f8f9fa;
+  --text-color: #343a40;
+  --border-color: #ced4da;
+  --button-background-color: #007bff;
+  --button-text-color: #fff;
+  --button-hover-background-color: #0056b3;
+
+  /* Variables específicas para el navbar en modo claro */
+  --navbar-background-color: #ffffff;
+  --navbar-text-color: #343a40;
+  --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Variables para el modo oscuro */
+:root.dark {
+  --background-color: #343a40;
+  --text-color: #f8f9fa;
+  --border-color: #495057;
+  --button-background-color: #6c757d;
+  --button-text-color: #f8f9fa;
+  --button-hover-background-color: #5a6268;
+
+  /* Variables específicas para el navbar en modo oscuro */
+  --navbar-background-color: #495057;
+  --navbar-text-color: #f8f9fa;
+  --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

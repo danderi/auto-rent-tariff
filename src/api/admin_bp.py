@@ -24,7 +24,8 @@ def create_user():
     try:
         email = request.json.get('email')
         password = request.json.get('password')
-        name = request.json.get('name')
+        name = request.json.get('firstName')
+        last_name = request.json.get('lastName')
 
         if not email or not password or not name:
             return jsonify({'error': 'Email, password and Name are required.'}), 400
@@ -37,7 +38,7 @@ def create_user():
 
 
         # Ensamblamos el usuario nuevo
-        new_user = User(email=email, password=password_hash, name=name)
+        new_user = User(email=email, password=password_hash, name=name, last_name=last_name)
 
 
         db.session.add(new_user)
@@ -46,6 +47,7 @@ def create_user():
         good_to_share_user = {
             'id': new_user.id,
             'name':new_user.name,
+            'last_name': new_user.last_name,
             'email':new_user.email,
             'password':password
         }
@@ -60,33 +62,26 @@ def create_user():
 @admin_bp.route('/token', methods=['POST'])
 def get_token():
     try:
-        #  Primero chequeamos que por el body venga la info necesaria:
         email = request.json.get('email')
         password = request.json.get('password')
 
         if not email or not password:
             return jsonify({'error': 'Email and password are required.'}), 400
-        
-        # Buscamos al usuario con ese correo electronico ( si lo encuentra lo guarda ):
-        login_user = User.query.filter_by(email=request.json['email']).one()
 
-        # Verificamos que el password sea correcto:
-        password_from_db = login_user.password #  Si loguin_user está vacio, da error y se va al "Except".
-        true_o_false = bcrypt.check_password_hash(password_from_db, password)
-        
-        # Si es verdadero generamos un token y lo devuelve en una respuesta JSON:
-        if true_o_false:
-            expires = timedelta(minutes=30)  # pueden ser "hours", "minutes", "days","seconds"
+        login_user = User.query.filter_by(email=email).first()
+        if not login_user:
+            return jsonify({'error': 'User not found.'}), 404
 
-            user_id = login_user.id       # recuperamos el id del usuario para crear el token...
-            access_token = create_access_token(identity=user_id, expires_delta=expires)   # creamos el token con tiempo vencimiento
-            return jsonify({ 'access_token':access_token}), 200  # Enviamos el token al front ( si es necesario serializamos el "login_user" y tambien lo enviamos en el objeto json )
+        if not bcrypt.check_password_hash(login_user.password, password):
+            return jsonify({'error': 'Invalid password.'}), 401
 
-        else:
-            return {"Error":"Contraseña  incorrecta"}
-    
+        expires = timedelta(minutes=30)
+        access_token = create_access_token(identity=login_user.id, expires_delta=expires)
+        return jsonify({ 'access_token': access_token }), 200
+
     except Exception as e:
-        return {"Error":"El email proporcionado no corresponde a ninguno registrado: " + str(e)}, 500
+        return jsonify({'error': 'Error during login: ' + str(e)}), 500
+
     
 # EJEMPLO DE RUTA RESTRINGIDA POR TOKEN. ( LA MISMA RECUPERA TODOS LOS USERS Y LO ENVIA PARA QUIEN ESTÉ LOGUEADO )
     
