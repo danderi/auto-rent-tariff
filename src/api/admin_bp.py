@@ -104,3 +104,74 @@ def show_users():
         return jsonify(user_list), 200
     else:
         return {"Error": "Token inválido o no proporcionado"}, 401
+
+
+#------EDIT USER-------------------------------------------------------
+@admin_bp.route('/users/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def update_user(user_id):
+    try:
+        current_user_id = get_jwt_identity()
+        if current_user_id:
+            user = User.query.get(user_id)
+            if not user:
+                return jsonify({'error': 'User not found.'}), 404
+            
+            email = request.json.get('email')
+            password = request.json.get('password')
+            name = request.json.get('firstName')
+            last_name = request.json.get('lastName')
+
+            if email:
+                existing_user = User.query.filter_by(email=email).first()
+                if existing_user and existing_user.id != user_id:
+                    return jsonify({'error': 'Email already exists.'}), 409
+                user.email = email
+
+            if password:
+                user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+            if name:
+                user.name = name
+
+            if last_name:
+                user.last_name = last_name
+
+            db.session.commit()
+
+            updated_user = {
+                'id': user.id,
+                'name': user.name,
+                'last_name': user.last_name,
+                'email': user.email
+            }
+
+            return jsonify({'message': 'User updated successfully.', 'user_updated': updated_user}), 200
+        else:
+            return {"Error": "Token inválido o no proporcionado"}, 401
+    except Exception as e:
+        return jsonify({'error': 'Error in user update: ' + str(e)}), 500
+
+
+#--------DELETE USER------------------------------------------------------------------------
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    try:
+        current_user_id = get_jwt_identity()
+        if current_user_id:
+            user = User.query.get(user_id)
+            if not user:
+                return jsonify({'error': 'User not found.'}), 404
+            
+            db.session.delete(user)
+            db.session.commit()
+
+            return jsonify({'message': 'User deleted successfully.'}), 200
+        else:
+            return {"Error": "Token inválido o no proporcionado"}, 401
+    except Exception as e:
+        return jsonify({'error': 'Error in user deletion: ' + str(e)}), 500
+
+
