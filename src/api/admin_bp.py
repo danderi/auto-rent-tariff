@@ -95,9 +95,12 @@ def show_users():
         for user in users:
             user_dict = {
                 'id': user.id,
-                'email': user.email
+                'email': user.email,
+                'name': user.name,
+                'last_name': user.last_name
             }
             user_list.append(user_dict)
+            print('User list:', user_list)
         return jsonify(user_list), 200
     else:
         return {"Error": "Token inválido o no proporcionado"}, 401

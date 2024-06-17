@@ -9,6 +9,7 @@ const UsersList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             const response = await actions.getUsers();
+            console.log('Users in component:', response); // Añadir esta línea para verificar los datos en el componente
             setUsers(response);
         };
 
@@ -23,6 +24,7 @@ const UsersList = () => {
                     {users.map(user => (
                         <li key={user.id}>
                             <p><strong>Name:</strong> {user.name}</p>
+                            <p><strong>Last Name:</strong> {user.last_name}</p>
                             <p><strong>Email:</strong> {user.email}</p>
                         </li>
                     ))}

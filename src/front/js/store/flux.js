@@ -95,6 +95,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
 
                     const data = await response.json();
+                    console.log('Fetched users:', data); // Añadir esta línea para verificar los datos
                     if (response.ok) {
                         return data;
                     } else {
