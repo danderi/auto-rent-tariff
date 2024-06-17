@@ -29,7 +29,7 @@ const Login = () => {
             if (response.success) {
                 setLoginData({ email: "", password: "" });
                 setLoggingIn(false);
-                navigate("/private");
+                navigate("/users");
             } else {
                 if (response.error === "User not found.") {
                     setErrors({ email: "User not found. Please check your email." });
