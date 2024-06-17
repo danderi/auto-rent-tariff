@@ -25,7 +25,9 @@ const Login = () => {
         e.preventDefault();
         try {
             setLoggingIn(true);
+            console.log('Login data:', loginData); // Verificar los datos de login
             const response = await actions.submitLoginForm(loginData);
+            console.log('Login response:', response); // Verificar la respuesta de submitLoginForm
             if (response.success) {
                 setLoginData({ email: "", password: "" });
                 setLoggingIn(false);
@@ -84,8 +86,8 @@ const Login = () => {
                             <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
                                 {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
                             </span>
+                            {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                         </div>
-                        {(errors.password || (errors.common && !loginData.password)) && <div className="invalid-feedback">{errors.password || "Password is required"}</div>}
                     </div>
                     {errors.common && !errors.password && <div className="alert alert-danger">{errors.common}</div>}
                     <button type="submit" className="btn btn-primary w-100 mt-3">Login</button>

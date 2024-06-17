@@ -52,6 +52,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const statusCode = response.status;
                     const responseData = await response.json();
 
+                    console.log('Response status:', statusCode);
+                    console.log('Response data:', responseData);
+
                     if (statusCode === 200) {
                         setStore({ ...getStore(), loginStatus: true });
                         localStorage.setItem('token', responseData.access_token);
