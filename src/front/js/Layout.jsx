@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 
 const Layout = () => {
   const { store, actions } = useContext(Context);
+  const basename = process.env.PUBLIC_URL || "";
 
   useEffect(() => {
     const savedMode = localStorage.getItem('dark-mode') === 'true';
@@ -18,7 +19,7 @@ const Layout = () => {
   }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Navbar />
       <div>
         <Routes>
