@@ -1,5 +1,7 @@
 /* src/front/styles/navbar.css */
 
+@import './variables.css';
+
 .navbar {
   display: flex;
   justify-content: space-between;
