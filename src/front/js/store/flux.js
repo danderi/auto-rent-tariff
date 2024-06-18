@@ -85,6 +85,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                 localStorage.removeItem('token');
             },
 
+            setLoginStatus: (status) => {
+                setStore({ loginStatus: status });
+            },
+            
             getUsers: async () => {
                 try {
                     const token = localStorage.getItem('token');
