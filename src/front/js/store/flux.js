@@ -54,6 +54,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     if (statusCode === 200) {
                         localStorage.setItem('token', responseData.access_token); // Guardar el token en localStorage
+                        console.log("Token stored:", responseData.access_token); // Added log to check the stored token
                         return { success: true };
                     } else if (statusCode === 400) {
                         return { success: false, error: responseData.error };

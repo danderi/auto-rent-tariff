@@ -17,17 +17,15 @@ const Layout = () => {
     }
   }, []);
 
-  const isAuthenticated = () => !!localStorage.getItem('token');
-
   return (
     <BrowserRouter>
       <Navbar />
       <div>
         <Routes>
-          <Route exact path="/" element={isAuthenticated() ? <Navigate to="/users" /> : <Login />} />
+          <Route exact path="/" element={<Login />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/register" element={<Register />} />
-          <Route exact path="/users" element={isAuthenticated() ? <UsersList /> : <Navigate to="/login" />} />
+          <Route exact path="/users" element={<UsersList />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

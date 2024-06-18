@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Context } from '../store/appContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa'; // Importación de los iconos
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 import "../../styles/auth.css";
 
 const Register = () => {
@@ -17,6 +17,7 @@ const Register = () => {
     const [creatingUser, setCreatingUser] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     const validateForm = () => {
         const errors = {};
@@ -39,7 +40,7 @@ const Register = () => {
     const handleInputChange = e => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        setErrors({ ...errors, [name]: '' }); // Clear error message when user starts typing
+        setErrors({ ...errors, [name]: '' });
 
         if (name === 'password') {
             evaluatePasswordStrength(value);
@@ -60,7 +61,7 @@ const Register = () => {
     const handleSubmit = async e => {
         e.preventDefault();
         if (validateForm()) {
-            setCreatingUser(true); // Mostrar el mensaje "creating user"
+            setCreatingUser(true);
             try {
                 const response = await actions.register(formData);
                 if (response.success) {
@@ -70,8 +71,11 @@ const Register = () => {
                         lastName: "",
                         password: ""
                     });
-                    setCreatingUser(false); // Ocultar el mensaje "creating user"
-                    navigate("/login");
+                    setSuccessMessage("User created successfully! Redirecting to login...");
+                    setTimeout(() => {
+                        setCreatingUser(false);
+                        navigate("/login");
+                    }, 2000); // Redirigir después de 2 segundos
                 } else {
                     if (response.error === 'Email already exists.') {
                         setErrors({ email: "User already exists. Please use a different email." });
@@ -83,7 +87,7 @@ const Register = () => {
             } catch (error) {
                 console.error("Error:", error);
                 setErrors({ common: "An error occurred. Please try again." });
-                setCreatingUser(false); // Ocultar el mensaje "creating user"
+                setCreatingUser(false);
             }
         }
     };
@@ -109,6 +113,7 @@ const Register = () => {
         <div className="auth-container">
             <div className="auth-card">
                 <h4 className="card-title text-center mb-4">Sign Up</h4>
+                {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label htmlFor="exampleInputEmail1" className="form-label">Email address</label>
@@ -176,6 +181,7 @@ const Register = () => {
                             Password should be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and symbols.
                         </p>
                     </div>
+                    {errors.common && <div className="alert alert-danger">{errors.common}</div>}
                     <button type="submit" className="btn btn-primary w-100 mt-3">Submit</button>
                     {creatingUser && <p className="text-center mt-3">
                         <span className="dot-flashing-container">
