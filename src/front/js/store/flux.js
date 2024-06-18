@@ -52,12 +52,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const statusCode = response.status;
                     const responseData = await response.json();
 
-                    console.log('Response status:', statusCode);
-                    console.log('Response data:', responseData);
-
                     if (statusCode === 200) {
-                        setStore({ ...getStore(), loginStatus: true });
-                        localStorage.setItem('token', responseData.access_token);
+                        localStorage.setItem('token', responseData.access_token); // Guardar el token en localStorage
                         return { success: true };
                     } else if (statusCode === 400) {
                         return { success: false, error: responseData.error };
@@ -81,14 +77,9 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             logout: () => {
-                setStore({ loginStatus: false });
                 localStorage.removeItem('token');
             },
 
-            setLoginStatus: (status) => {
-                setStore({ loginStatus: status });
-            },
-            
             getUsers: async () => {
                 try {
                     const token = localStorage.getItem('token');
@@ -99,7 +90,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
 
                     const data = await response.json();
-                    console.log('Fetched users:', data); // Añadir esta línea para verificar los datos
                     if (response.ok) {
                         return data;
                     } else {

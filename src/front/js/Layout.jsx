@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import NotFound from "./views/NotFound";
 import UsersList from "./views/UsersList";
 import injectContext, { Context } from './store/appContext';
@@ -17,16 +17,18 @@ const Layout = () => {
     }
   }, []);
 
+  const isAuthenticated = () => !!localStorage.getItem('token');
+
   return (
     <BrowserRouter>
       <Navbar />
       <div>
         <Routes>
-          <Route exact path="/" element={<Login />} />
+          <Route exact path="/" element={isAuthenticated() ? <Navigate to="/users" /> : <Login />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/register" element={<Register />} />
-          <Route exact path="/users" element={<UsersList />} />
-          <Route exact path="/*" element={<NotFound />} />
+          <Route exact path="/users" element={isAuthenticated() ? <UsersList /> : <Navigate to="/login" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -12,10 +12,12 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    const isAuthenticated = () => !!localStorage.getItem('token');
+
     return (
         <nav className="navbar">
             <div className="navbar-links">
-                {store.loginStatus && (
+                {isAuthenticated() && (
                     <>
                         <Link to="/users">Users</Link>
                         <button onClick={handleLogout}>Logout</button>
