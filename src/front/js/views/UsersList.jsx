@@ -4,7 +4,7 @@ import { Context } from '../store/appContext';
 import "../../styles/usersList.css";
 
 const UsersList = () => {
-    const { store, actions } = useContext(Context);
+    const { actions } = useContext(Context);
     const [users, setUsers] = useState([]);
     const navigate = useNavigate();
 
