@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Context } from '../store/appContext';
 import "../../styles/navbar.css"; // Asegúrate de tener este archivo CSS
@@ -6,6 +6,13 @@ import "../../styles/navbar.css"; // Asegúrate de tener este archivo CSS
 const Navbar = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const savedMode = localStorage.getItem('dark-mode') === 'true';
+        if (savedMode !== store.darkMode) {
+            actions.toggleDarkMode();
+        }
+    }, [actions, store.darkMode]);
 
     const handleLogout = () => {
         actions.logout();
