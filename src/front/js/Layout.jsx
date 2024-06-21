@@ -16,7 +16,7 @@ const Layout = () => {
     if (savedMode !== store.darkMode) {
       actions.toggleDarkMode();
     }
-  }, []);
+  }, [actions, store.darkMode]);
 
   return (
     <BrowserRouter basename={basename}>
