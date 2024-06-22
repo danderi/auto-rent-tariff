@@ -1,3 +1,4 @@
+#app.py
 import os # para saber la ruta absoluta de la db si no la encontramos
 from flask_bcrypt import Bcrypt  # para encriptar y comparar
 from flask import Flask, request, jsonify # Para endpoints
@@ -45,7 +46,9 @@ if not os.path.exists(os.path.dirname(db_path)): # Nos aseguramos que se cree ca
 
 with app.app_context():
     db.init_app(app)
-    db.create_all() # Nos aseguramos que este corriendo en el contexto del proyecto.
+    # db.create_all() # Nos aseguramos que este corriendo en el contexto del proyecto.
+    if not os.path.exists(db_path):
+        db.create_all()
 # -----------------------
 
 # AL FINAL ( detecta que encendimos el servidor desde terminal y nos da detalles de los errores )

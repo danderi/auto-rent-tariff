@@ -1,3 +1,4 @@
+#admin_bp.py
 # En el conjunto de datos que quiero separar ( en este caso este tipo de rutas ), importo...
 from flask import Blueprint, request, jsonify # Blueprint para modularizar y relacionar con app
 from flask_bcrypt import Bcrypt                                  # Bcrypt para encriptación
