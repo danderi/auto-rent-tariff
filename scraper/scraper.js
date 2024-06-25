@@ -1,53 +1,43 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+// Usa el plugin stealth para evitar ser detectado
+puppeteer.use(StealthPlugin());
 
 (async () => {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: false, // Cambia a true si no necesitas ver el navegador
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
-            '--disable-infobars',
-            '--window-position=0,0',
-            '--ignore-certifcate-errors',
-            '--ignore-certifcate-errors-spki-list',
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins,site-per-process',
-            '--flag-switches-begin',
-            '--disable-site-isolation-trials',
-            '--flag-switches-end',
-        ],
-        ignoreHTTPSErrors: true,
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process', // Este parámetro a veces puede causar problemas, puedes probar a eliminarlo si es necesario
+            '--disable-gpu'
+        ]
     });
 
     const page = await browser.newPage();
 
-    // Habilitar la interceptación de solicitudes
-    await page.setRequestInterception(true);
-
-    // Manejar las solicitudes de red
-    page.on('request', request => {
-        const headers = request.headers();
-        headers['Accept-Language'] = 'en-US,en;q=0.9';
-        request.continue({ headers });
-    });
-
-    // Configurar el User-Agent para que parezca un navegador real
+    // Establece el agente de usuario
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-    // Desactivar la caché
-    await page.setCacheEnabled(false);
+    // Establece un viewport para simular una ventana de navegador
+    await page.setViewport({ width: 1280, height: 800 });
+
+    // Configurar el manejo de errores y capturar cualquier mensaje de la consola del navegador
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    page.on('error', err => console.error('PAGE ERROR:', err));
+    page.on('pageerror', pageErr => console.error('PAGE ERROR:', pageErr));
 
     try {
-        await page.goto('https://www.hertz.com.ar', { waitUntil: 'networkidle2', timeout: 120000 });
+        await page.goto('https://www.hertz.com.ar', { waitUntil: 'load', timeout: 120000 });
 
         console.log('Esperando dropdown de selección de lugar...');
-        await page.screenshot({ path: 'before_waitForSelector.png' }); // Captura de pantalla antes de esperar el selector
-
         await page.waitForSelector('.css-1hwfws3', { visible: true, timeout: 60000 });
-
         console.log('Dropdown de selección de lugar encontrado');
-        await page.screenshot({ path: 'after_waitForSelector.png' }); // Captura de pantalla después de esperar el selector
-
         await page.click('.css-1hwfws3');
         console.log('Dropdown de selección de lugar clicado');
 
@@ -139,9 +129,23 @@ const puppeteer = require('puppeteer');
         // Capturar una pantalla para verificar visualmente la selección
         await page.screenshot({ path: 'resultados_busqueda.png' });
 
+        // Extraer los precios, categorías y modelos
+        console.log('Extrayendo datos de los resultados...');
+        const results = await page.evaluate(() => {
+            const cars = [];
+            const carElements = document.querySelectorAll('.sc-dNLxif.dQgtqi.row.mb-3.mr-0.ml-0.d-flex.search-item-row.car-item.pt-4.pb-4.pl-4.pr-4'); // Ajusta este selector
+            carElements.forEach(carElement => {
+                const model = carElement.querySelector('.car-name')?.innerText; // Ajusta este selector
+                const category = carElement.querySelector('.car-category')?.innerText; // Ajusta este selector
+                const price = carElement.querySelector('.rent-price .long-value')?.innerText; // Ajusta este selector
+                cars.push({ model, category, price });
+            });
+            return cars;
+        });
+
+        console.log('Datos extraídos:', results);
     } catch (error) {
-        console.error('Error durante la ejecución del scraper:', error);
-        await page.screenshot({ path: 'error_screenshot.png' }); // Captura de pantalla en caso de error
+        console.error('Error durante la ejecución del script:', error);
     } finally {
         await browser.close();
     }
