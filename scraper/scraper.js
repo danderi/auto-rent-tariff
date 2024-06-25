@@ -44,8 +44,25 @@ const puppeteer = require('puppeteer');
 
     console.log('Fecha de entrega/retiro seleccionada directamente en el input');
 
+    // Esperar un poco para que se refleje la selección
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Seleccionar la fecha de devolución directamente en el input
+    console.log('Esperando el campo de fecha de devolución...');
+    await page.waitForSelector('input[aria-label="Fecha de Devolución"]', { visible: true, timeout: 60000 });
+    console.log('Campo de fecha de devolución encontrado');
+    
+    await page.evaluate(() => {
+        const returnDateInput = document.querySelector('input[aria-label="Fecha de Devolución"]');
+        returnDateInput.removeAttribute('readonly');
+        returnDateInput.value = '01/07/2024'; // Fecha deseada de devolución
+        returnDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    console.log('Fecha de devolución seleccionada directamente en el input');
+
     // Capturar una pantalla para verificar visualmente la selección
-    await page.screenshot({ path: 'seleccion_fecha_retiro.png' });
+    await page.screenshot({ path: 'seleccion_fechas_retiro_devolucion.png' });
 
     await browser.close();
 })();
