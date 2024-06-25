@@ -1,53 +1,15 @@
 const puppeteer = require('puppeteer');
 
-(async () => {
-    const browser = await puppeteer.launch({
-        headless: false,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-infobars',
-            '--window-position=0,0',
-            '--ignore-certifcate-errors',
-            '--ignore-certifcate-errors-spki-list',
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins,site-per-process',
-            '--flag-switches-begin',
-            '--disable-site-isolation-trials',
-            '--flag-switches-end',
-        ],
-        ignoreHTTPSErrors: true,
-    });
-
+async function scrape(url) {
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
-
-    // Habilitar la interceptación de solicitudes
-    await page.setRequestInterception(true);
-
-    // Manejar las solicitudes de red
-    page.on('request', request => {
-        const headers = request.headers();
-        headers['Accept-Language'] = 'en-US,en;q=0.9';
-        request.continue({ headers });
-    });
-
-    // Configurar el User-Agent para que parezca un navegador real
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-
-    // Desactivar la caché
-    await page.setCacheEnabled(false);
-
+    
     try {
-        await page.goto('https://www.hertz.com.ar', { waitUntil: 'networkidle2', timeout: 120000 });
+        await page.goto(url);
 
         console.log('Esperando dropdown de selección de lugar...');
-        await page.screenshot({ path: 'before_waitForSelector.png' }); // Captura de pantalla antes de esperar el selector
-
         await page.waitForSelector('.css-1hwfws3', { visible: true, timeout: 60000 });
-
         console.log('Dropdown de selección de lugar encontrado');
-        await page.screenshot({ path: 'after_waitForSelector.png' }); // Captura de pantalla después de esperar el selector
-
         await page.click('.css-1hwfws3');
         console.log('Dropdown de selección de lugar clicado');
 
@@ -139,10 +101,31 @@ const puppeteer = require('puppeteer');
         // Capturar una pantalla para verificar visualmente la selección
         await page.screenshot({ path: 'resultados_busqueda.png' });
 
+        // Obtener precios, categorías y modelos
+        const carData = await page.evaluate(() => {
+            const cars = [];
+            const carElements = document.querySelectorAll('.carClass'); // Ajusta el selector según la estructura real del sitio
+
+            carElements.forEach(carElement => {
+                const model = carElement.querySelector('.carModel').innerText.trim(); // Ajusta el selector según la estructura real del sitio
+                const category = carElement.querySelector('.carCategory').innerText.trim(); // Ajusta el selector según la estructura real del sitio
+                const price = carElement.querySelector('.carPrice').innerText.trim(); // Ajusta el selector según la estructura real del sitio
+                cars.push({ model, category, price });
+            });
+
+            return cars;
+        });
+
+        console.log('Datos de los autos:', carData);
+
+        await browser.close();
+
+        return carData;
     } catch (error) {
         console.error('Error durante la ejecución del scraper:', error);
-        await page.screenshot({ path: 'error_screenshot.png' }); // Captura de pantalla en caso de error
-    } finally {
         await browser.close();
+        return null;
     }
-})();
+}
+
+module.exports = { scrape };
