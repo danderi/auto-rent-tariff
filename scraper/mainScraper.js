@@ -7,6 +7,12 @@ const hertzScraper = require('./hertzScraper');
 // const taraboreliScraper = require('./taraboreliScraper'); // Asegúrate de tener este archivo implementado
 
 (async () => {
+    const desiredLocation = 'Bariloche Centro';
+    const startDate = '01/07/2024';
+    const endDate = '02/07/2024';
+    const startTime = '11:00';
+    const endTime = '11:00';
+
     // URLs de las páginas de las rentadoras
     const urls = {
         hertz: 'https://www.hertz.com.ar',
@@ -20,15 +26,27 @@ const hertzScraper = require('./hertzScraper');
 
     try {
         // Llamadas a los scrapers de cada rentadora
-        const hertzData = await hertzScraper.scrape(urls.hertz);
+        const hertzData = await hertzScraper.scrapeHertz(urls.hertz, desiredLocation, startDate, endDate, startTime, endTime);
         console.log('Datos de Hertz:', hertzData);
 
-        // await localizaScraper.scrape(urls.localiza); // Descomenta cuando tengas estos archivos implementados
-        // await avisScraper.scrape(urls.avis);
-        // await fitScraper.scrape(urls.fit);
-        // await europcarScrape.scrape(urls.europcar);
-        // await alamoScraper.scrape(urls.alamo);
-        // await taraboreliScrape.scrape(urls.taraboreli);
+        // Llamar a los otros scrapers de la misma manera cuando estén implementados
+        // const localizaData = await localizaScraper.scrapeLocaliza(urls.localiza, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Localiza:', localizaData);
+        
+        // const avisData = await avisScraper.scrapeAvis(urls.avis, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Avis:', avisData);
+
+        // const fitData = await fitScraper.scrapeFit(urls.fit, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Fit:', fitData);
+
+        // const europcarData = await europcarScraper.scrapeEuropcar(urls.europcar, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Europcar:', europcarData);
+
+        // const alamoData = await alamoScraper.scrapeAlamo(urls.alamo, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Alamo:', alamoData);
+
+        // const taraboreliData = await taraboreliScraper.scrapeTaraboreli(urls.taraboreli, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Taraboreli:', taraboreliData);
     } catch (error) {
         console.error('Error en mainScraper:', error);
     }

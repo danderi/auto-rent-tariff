@@ -1,11 +1,39 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
-async function scrape(url) {
-    const browser = await puppeteer.launch({ headless: false });
+// Usa el plugin stealth para evitar ser detectado
+puppeteer.use(StealthPlugin());
+
+async function scrapeHertz(url, desiredLocation, startDate, endDate, startTime, endTime) {
+    const browser = await puppeteer.launch({
+        headless: false, // Cambia a true si no necesitas ver el navegador
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process', // Este parámetro a veces puede causar problemas, puedes probar a eliminarlo si es necesario
+            '--disable-gpu'
+        ]
+    });
+
     const page = await browser.newPage();
-    
+
+    // Establece el agente de usuario
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+
+    // Establece un viewport para simular una ventana de navegador
+    await page.setViewport({ width: 1280, height: 800 });
+
+    // Configurar el manejo de errores y capturar cualquier mensaje de la consola del navegador
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    page.on('error', err => console.error('PAGE ERROR:', err));
+    page.on('pageerror', pageErr => console.error('PAGE ERROR:', pageErr));
+
     try {
-        await page.goto(url);
+        await page.goto(url, { waitUntil: 'load', timeout: 120000 });
 
         console.log('Esperando dropdown de selección de lugar...');
         await page.waitForSelector('.css-1hwfws3', { visible: true, timeout: 60000 });
@@ -19,7 +47,6 @@ async function scrape(url) {
         const options = await page.$$eval('.css-fk865s-option, .css-1kti9hw-option', options => options.map(option => option.textContent.trim()));
         console.log('Opciones disponibles:', options);
 
-        const desiredLocation = 'Bariloche Centro'; // Cambia esta línea por la localidad deseada
         const optionIndex = options.indexOf(desiredLocation);
         console.log(`Índice de "${desiredLocation}":`, optionIndex);
 
@@ -37,12 +64,12 @@ async function scrape(url) {
         await page.waitForSelector('#drop-up-date-start', { visible: true, timeout: 60000 });
         console.log('Campo de fecha de entrega/retiro encontrado');
         
-        await page.evaluate(() => {
+        await page.evaluate((startDate) => {
             const dateInput = document.querySelector('#drop-up-date-start');
             dateInput.removeAttribute('readonly');
-            dateInput.value = '28/06/2024'; // Fecha deseada
+            dateInput.value = startDate; // Fecha deseada
             dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+        }, startDate);
 
         console.log('Fecha de entrega/retiro seleccionada directamente en el input');
 
@@ -54,25 +81,25 @@ async function scrape(url) {
         await page.waitForSelector('input[aria-label="Fecha de Devolución"]', { visible: true, timeout: 60000 });
         console.log('Campo de fecha de devolución encontrado');
         
-        await page.evaluate(() => {
+        await page.evaluate((endDate) => {
             const returnDateInput = document.querySelector('input[aria-label="Fecha de Devolución"]');
             returnDateInput.removeAttribute('readonly');
-            returnDateInput.value = '01/07/2024'; // Fecha deseada de devolución
+            returnDateInput.value = endDate; // Fecha deseada de devolución
             returnDateInput.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+        }, endDate);
 
         console.log('Fecha de devolución seleccionada directamente en el input');
 
         // Esperar un poco para que se refleje la selección
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         // Seleccionar la hora de entrega
         console.log('Esperando el campo de hora de entrega...');
         await page.waitForSelector('#pickupTime', { visible: true, timeout: 60000 });
         console.log('Campo de hora de entrega encontrado');
         
-        await page.select('#pickupTime', '11:00');
-        console.log('Hora de entrega seleccionada: 11:00');
+        await page.select('#pickupTime', startTime);
+        console.log(`Hora de entrega seleccionada: ${startTime}`);
 
         // Esperar un poco para que se refleje la selección
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -82,8 +109,8 @@ async function scrape(url) {
         await page.waitForSelector('#returnTime', { visible: true, timeout: 60000 });
         console.log('Campo de hora de devolución encontrado');
         
-        await page.select('#returnTime', '11:00');
-        console.log('Hora de devolución seleccionada: 11:00');
+        await page.select('#returnTime', endTime);
+        console.log(`Hora de devolución seleccionada: ${endTime}`);
 
         // Esperar un poco para que se refleje la selección
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -101,31 +128,28 @@ async function scrape(url) {
         // Capturar una pantalla para verificar visualmente la selección
         await page.screenshot({ path: 'resultados_busqueda.png' });
 
-        // Obtener precios, categorías y modelos
-        const carData = await page.evaluate(() => {
+        // Extraer los precios, categorías y modelos
+        console.log('Extrayendo datos de los resultados...');
+        const results = await page.evaluate(() => {
             const cars = [];
-            const carElements = document.querySelectorAll('.carClass'); // Ajusta el selector según la estructura real del sitio
-
+            const carElements = document.querySelectorAll('.sc-dNLxif.dQgtqi.row.mb-3.mr-0.ml-0.d-flex.search-item-row.car-item.pt-4.pb-4.pl-4.pr-4'); // Ajusta este selector
             carElements.forEach(carElement => {
-                const model = carElement.querySelector('.carModel').innerText.trim(); // Ajusta el selector según la estructura real del sitio
-                const category = carElement.querySelector('.carCategory').innerText.trim(); // Ajusta el selector según la estructura real del sitio
-                const price = carElement.querySelector('.carPrice').innerText.trim(); // Ajusta el selector según la estructura real del sitio
+                const model = carElement.querySelector('.car-name')?.innerText; // Ajusta este selector
+                const category = carElement.querySelector('.car-category')?.innerText; // Ajusta este selector
+                const price = carElement.querySelector('.rent-price .long-value')?.innerText; // Ajusta este selector
                 cars.push({ model, category, price });
             });
-
             return cars;
         });
 
-        console.log('Datos de los autos:', carData);
-
-        await browser.close();
-
-        return carData;
+        console.log('Datos extraídos:', results);
+        return results;
     } catch (error) {
-        console.error('Error durante la ejecución del scraper:', error);
+        console.error('Error durante la ejecución del script:', error);
+        return [];
+    } finally {
         await browser.close();
-        return null;
     }
 }
 
-module.exports = { scrape };
+module.exports = { scrapeHertz };

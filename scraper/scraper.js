@@ -68,7 +68,7 @@ puppeteer.use(StealthPlugin());
         await page.evaluate(() => {
             const dateInput = document.querySelector('#drop-up-date-start');
             dateInput.removeAttribute('readonly');
-            dateInput.value = '28/06/2024'; // Fecha deseada
+            dateInput.value = '01/07/2024'; // Fecha deseada
             dateInput.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
@@ -85,14 +85,14 @@ puppeteer.use(StealthPlugin());
         await page.evaluate(() => {
             const returnDateInput = document.querySelector('input[aria-label="Fecha de Devolución"]');
             returnDateInput.removeAttribute('readonly');
-            returnDateInput.value = '01/07/2024'; // Fecha deseada de devolución
+            returnDateInput.value = '02/07/2024'; // Fecha deseada de devolución
             returnDateInput.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
         console.log('Fecha de devolución seleccionada directamente en el input');
 
         // Esperar un poco para que se refleje la selección
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         // Seleccionar la hora de entrega
         console.log('Esperando el campo de hora de entrega...');
