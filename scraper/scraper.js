@@ -6,7 +6,7 @@ puppeteer.use(StealthPlugin());
 
 (async () => {
     const browser = await puppeteer.launch({
-        headless: false, // Cambia a true si no necesitas ver el navegador
+        headless: false,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -14,17 +14,17 @@ puppeteer.use(StealthPlugin());
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process', // Este parámetro a veces puede causar problemas, puedes probar a eliminarlo si es necesario
+            '--single-process', 
             '--disable-gpu'
         ]
     });
 
     const page = await browser.newPage();
 
-    // Establece el agente de usuario
+    // Establecer el agente de usuario
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-    // Establece un viewport para simular una ventana de navegador
+    // Establecer un viewport para simular una ventana de navegador
     await page.setViewport({ width: 1280, height: 800 });
 
     // Configurar el manejo de errores y capturar cualquier mensaje de la consola del navegador
@@ -33,117 +33,77 @@ puppeteer.use(StealthPlugin());
     page.on('pageerror', pageErr => console.error('PAGE ERROR:', pageErr));
 
     try {
-        await page.goto('https://www.hertz.com.ar', { waitUntil: 'load', timeout: 120000 });
+        await page.goto('https://www.localiza.com/argentina/es-ar', { waitUntil: 'load', timeout: 120000 });
 
-        console.log('Esperando dropdown de selección de lugar...');
-        await page.waitForSelector('.css-1hwfws3', { visible: true, timeout: 60000 });
-        console.log('Dropdown de selección de lugar encontrado');
-        await page.click('.css-1hwfws3');
-        console.log('Dropdown de selección de lugar clicado');
+        // Esperar a que el campo de localidad esté disponible
+        console.log('Esperando el campo de localidad...');
+        await page.waitForSelector('input[formcontrolname="searchValue"]', { visible: true, timeout: 60000 });
+        console.log('Campo de localidad encontrado');
 
-        console.log('Esperando que las opciones se carguen...');
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Esperar 3 segundos
+        // Hacer clic en el campo de entrada
+        await page.click('input[formcontrolname="searchValue"]');
+        console.log('Campo de localidad clicado');
 
-        const options = await page.$$eval('.css-fk865s-option, .css-1kti9hw-option', options => options.map(option => option.textContent.trim()));
-        console.log('Opciones disponibles:', options);
+        // Esperar un segundo antes de escribir
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const desiredLocation = 'Bariloche Centro'; // Cambia esta línea por la localidad deseada
-        const optionIndex = options.indexOf(desiredLocation);
-        console.log(`Índice de "${desiredLocation}":`, optionIndex);
+        // Escribir la localidad en el campo de input
+        const location = 'Centro Bariloche';
+        await page.type('input[formcontrolname="searchValue"]', location);
+        console.log(`Localidad "${location}" escrita en el campo de input`);
 
-        if (optionIndex !== -1) {
-            const selector = `.css-fk865s-option:nth-child(${optionIndex + 1}), .css-1kti9hw-option:nth-child(${optionIndex + 1})`;
-            console.log(`Usando selector: ${selector}`);
-            await page.click(selector);
-            console.log(`Opción "${desiredLocation}" seleccionada`);
-        } else {
-            console.log(`Opción "${desiredLocation}" no encontrada`);
-        }
-
-        // Seleccionar la fecha de retiro directamente en el input
-        console.log('Esperando el campo de fecha de entrega/retiro...');
-        await page.waitForSelector('#drop-up-date-start', { visible: true, timeout: 60000 });
-        console.log('Campo de fecha de entrega/retiro encontrado');
-        
-        await page.evaluate(() => {
-            const dateInput = document.querySelector('#drop-up-date-start');
-            dateInput.removeAttribute('readonly');
-            dateInput.value = '01/07/2024'; // Fecha deseada
-            dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-
-        console.log('Fecha de entrega/retiro seleccionada directamente en el input');
-
-        // Esperar un poco para que se refleje la selección
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Seleccionar la fecha de devolución directamente en el input
-        console.log('Esperando el campo de fecha de devolución...');
-        await page.waitForSelector('input[aria-label="Fecha de Devolución"]', { visible: true, timeout: 60000 });
-        console.log('Campo de fecha de devolución encontrado');
-        
-        await page.evaluate(() => {
-            const returnDateInput = document.querySelector('input[aria-label="Fecha de Devolución"]');
-            returnDateInput.removeAttribute('readonly');
-            returnDateInput.value = '02/07/2024'; // Fecha deseada de devolución
-            returnDateInput.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-
-        console.log('Fecha de devolución seleccionada directamente en el input');
-
-        // Esperar un poco para que se refleje la selección
+        // Esperar unos segundos para que se carguen los resultados
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // Seleccionar la hora de entrega
-        console.log('Esperando el campo de hora de entrega...');
-        await page.waitForSelector('#pickupTime', { visible: true, timeout: 60000 });
-        console.log('Campo de hora de entrega encontrado');
-        
-        await page.select('#pickupTime', '11:00');
-        console.log('Hora de entrega seleccionada: 11:00');
+        // Esperar a que la opción deseada esté disponible
+        console.log('Esperando la opción de localidad...');
+        await page.waitForSelector('span.places-list__item__name', { visible: true, timeout: 60000 });
+        console.log('Opción de localidad encontrada');
 
-        // Esperar un poco para que se refleje la selección
+        // Hacer clic en la opción deseada
+        await page.click('span.places-list__item__name');
+        console.log(`Opción de localidad "${location}" seleccionada`);
+
+        // Esperar 3 segundos para observar la selección
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Esperar a que el campo de fecha de retiro esté disponible
+        console.log('Esperando el campo de fecha de retiro...');
+        await page.waitForSelector('input[formcontrolname="pickupDate"]', { visible: true, timeout: 60000 });
+        console.log('Campo de fecha de retiro encontrado');
+
+        // Hacer clic en el campo de fecha de retiro
+        await page.click('input[formcontrolname="pickupDate"]');
+        console.log('Campo de fecha de retiro clicado');
+
+        // Esperar a que el calendario esté disponible
+        console.log('Esperando que el calendario esté disponible...');
+        await page.waitForSelector('button.mat-calendar-period-button', { visible: true, timeout: 60000 });
+        console.log('Botón para ver el calendario de año clicado');
+
+        // Agregar más tiempo de espera para asegurar que el calendario esté completamente cargado
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Seleccionar la hora de devolución
-        console.log('Esperando el campo de hora de devolución...');
-        await page.waitForSelector('#returnTime', { visible: true, timeout: 60000 });
-        console.log('Campo de hora de devolución encontrado');
-        
-        await page.select('#returnTime', '11:00');
-        console.log('Hora de devolución seleccionada: 11:00');
+        // Verificar el mes actual
+        const currentMonth = await page.$eval('button.mat-calendar-period-button span.mat-button-wrapper span[id^="mat-calendar-button', el => el.textContent.trim());
+        console.log(`Mes actual: ${currentMonth}`);
 
-        // Esperar un poco para que se refleje la selección
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        if (currentMonth !== 'JUL 2024') {
+            console.log('Cambiando al mes deseado...');
+            while (true) {
+                await page.click('button.mat-calendar-next-button');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const newMonth = await page.$eval('span[id^="mat-calendar-button"]', el => el.textContent.trim());
+                console.log(`Nuevo mes actual: ${newMonth}`);
+                if (newMonth === 'JUL 2024') {
+                    break;
+                }
+            }
+        }
 
-        // Hacer clic en el botón de buscar
-        console.log('Esperando el botón de buscar...');
-        await page.waitForSelector('.sc-jwKygS.cAXtoF.submit-btn.search-form_button', { visible: true, timeout: 60000 });
-        console.log('Botón de buscar encontrado');
-        await page.click('.sc-jwKygS.cAXtoF.submit-btn.search-form_button');
-        console.log('Botón de buscar clicado');
-
-        // Esperar un tiempo para que se carguen los resultados
-        await new Promise(resolve => setTimeout(resolve, 15000));
-
-        // Capturar una pantalla para verificar visualmente la selección
-        await page.screenshot({ path: 'resultados_busqueda.png' });
-
-        // Extraer los precios, categorías y modelos
-        console.log('Extrayendo datos de los resultados...');
-        const results = await page.evaluate(() => {
-            const cars = [];
-            const carElements = document.querySelectorAll('.sc-dNLxif.dQgtqi.row.mb-3.mr-0.ml-0.d-flex.search-item-row.car-item.pt-4.pb-4.pl-4.pr-4'); // Ajusta este selector
-            carElements.forEach(carElement => {
-                const model = carElement.querySelector('.car-name')?.innerText; // Ajusta este selector
-                const category = carElement.querySelector('.car-category')?.innerText; // Ajusta este selector
-                const price = carElement.querySelector('.rent-price .long-value')?.innerText; // Ajusta este selector
-                cars.push({ model, category, price });
-            });
-            return cars;
-        });
-
-        console.log('Datos extraídos:', results);
+        // Hacer clic en el día deseado
+        await page.click('div.mat-calendar-body-cell-content.mat-focus-indicator:contains("5")');
+        console.log('Fecha de retiro seleccionada');
     } catch (error) {
         console.error('Error durante la ejecución del script:', error);
     } finally {

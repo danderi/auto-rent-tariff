@@ -1,5 +1,6 @@
-const hertzScraper = require('./hertzScraper');
+// const hertzScraper = require('./hertzScraper');
 // const localizaScraper = require('./localizaScraper'); // Asegúrate de tener este archivo implementado
+const sixtScraper = require('./sixtScraper');
 // const avisScraper = require('./avisScraper'); // Asegúrate de tener este archivo implementado
 // const fitScraper = require('./fitScraper'); // Asegúrate de tener este archivo implementado
 // const europcarScraper = require('./europcarScraper'); // Asegúrate de tener este archivo implementado
@@ -7,16 +8,17 @@ const hertzScraper = require('./hertzScraper');
 // const taraboreliScraper = require('./taraboreliScraper'); // Asegúrate de tener este archivo implementado
 
 (async () => {
-    const desiredLocation = 'Bariloche Centro';
-    const startDate = '01/07/2024';
-    const endDate = '02/07/2024';
-    const startTime = '11:00';
-    const endTime = '11:00';
+    const desiredLocation = 'San Carlos de Bariloche';
+    const startDate = '30/07/2024';
+    const endDate = '31/07/2024';
+    const startTime = '12:00';
+    const endTime = '12:00';
 
     // URLs de las páginas de las rentadoras
     const urls = {
         hertz: 'https://www.hertz.com.ar',
-        localiza: 'https://url_de_la_pagina_localiza',
+        localiza: 'https://www.localiza.com/argentina/es-ar',
+        sixt: 'https://www.sixt.com.ar',
         avis: 'https://url_de_la_pagina_avis',
         fit: 'https://url_de_la_pagina_fit',
         europcar: 'https://url_de_la_pagina_europcar',
@@ -26,12 +28,15 @@ const hertzScraper = require('./hertzScraper');
 
     try {
         // Llamadas a los scrapers de cada rentadora
-        const hertzData = await hertzScraper.scrapeHertz(urls.hertz, desiredLocation, startDate, endDate, startTime, endTime);
-        console.log('Datos de Hertz:', hertzData);
+        // const hertzData = await hertzScraper.scrapeHertz(urls.hertz, desiredLocation, startDate, endDate, startTime, endTime);
+        // console.log('Datos de Hertz:', hertzData);
 
-        // Llamar a los otros scrapers de la misma manera cuando estén implementados
+        //Llamar a los otros scrapers de la misma manera cuando estén implementados
         // const localizaData = await localizaScraper.scrapeLocaliza(urls.localiza, desiredLocation, startDate, endDate, startTime, endTime);
         // console.log('Datos de Localiza:', localizaData);
+
+        const sixtData = await sixtScraper.scrapeSixt(urls.sixt, desiredLocation, startDate, endDate, startTime, endTime);
+        console.log('Datos de Sixt:', sixtData);
         
         // const avisData = await avisScraper.scrapeAvis(urls.avis, desiredLocation, startDate, endDate, startTime, endTime);
         // console.log('Datos de Avis:', avisData);
