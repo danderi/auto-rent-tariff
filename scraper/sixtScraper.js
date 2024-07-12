@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
-puppeteer.use(StealthPlugin());
-
 async function scrapeSixt(url, location) {
+    puppeteer.use(StealthPlugin());
+
     const browser = await puppeteer.launch({
         headless: false, // Cambiar a true si no necesitas ver el navegador
         args: [
@@ -24,44 +24,28 @@ async function scrapeSixt(url, location) {
     await page.setViewport({ width: 1280, height: 800 });
 
     try {
-        // Navegar a la página de Sixt
+        console.log(`Navigating to Sixt page: ${url}`);
         await page.goto(url, { waitUntil: 'load', timeout: 120000 });
+        console.log('Successfully navigated to Sixt page.');
 
-        // Intentamos hacer clic en el botón de aceptar cookies
-        // try {
-        //     const acceptCookiesButton = await page.waitForSelector('button.sc-dcJsrY.byCChc', { timeout: 30000 });
-        //     if (acceptCookiesButton) {
-        //         await acceptCookiesButton.click();
-        //         console.log('Se hizo clic en el botón de aceptar cookies.');
-        //     } else {
-        //         console.error('No se encontró el botón de aceptar cookies en el tiempo esperado.');
-        //     }
-        // } catch (error) {
-        //     console.error('Error al esperar o hacer clic en el botón de aceptar cookies:', error);
-        // }
+        // Esperar a que el body tenga la clase "overflowHidden"
+        await page.waitForFunction(() => document.body.classList.contains('overflowHidden'));
+        console.log('Body has class "overflowHidden". Proceeding...');
 
-        // Hacer clic en el input para seleccionar la localidad
-        await page.waitForSelector('button.sc-1609ze3-0.hNJlby.sc-1a85fbf-2.kCRFly');
-        await page.click('button.sc-1609ze3-0.hNJlby.sc-1a85fbf-2.kCRFly');
+        // Simular presionar la tecla Tab varias veces para llegar al botón "ACEPTO"
+        for (let i = 0; i < 4; i++) {
+            await page.keyboard.press('Tab');
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar un segundo después de cada presión de Tab
+        }
 
-        // Esperar un breve momento para que aparezca el input de búsqueda de localización
-        await page.waitForTimeout(2000);
+        // Hacer clic en el botón "ACEPTO"
+        await page.keyboard.press('Enter'); // Suponiendo que Enter activa el botón "ACEPTO"
+        console.log('Se hizo clic en el botón "ACEPTO" para aceptar todas las cookies.');
 
-        // Ingresar la ubicación en el input de búsqueda
-        const locationInput = await page.$('input[name="searchLocation"]');
-        await locationInput.type(location);
+        // Aquí puedes agregar el resto del código para seleccionar la localidad, etc.
+        // ...
 
-        // Esperar un momento para que se actualicen las sugerencias de ubicación
-        await page.waitForTimeout(2000);
-
-        // Seleccionar la primera opción visible en la lista de sugerencias (suponiendo que es "San Carlos de Bariloche")
-        await page.click('.rs-1m3oiv3.kYMdEq');
-
-        // Puedes tomar una captura de pantalla para verificar que la ubicación se haya seleccionado correctamente
-        await page.screenshot({ path: 'sixt-location-selected.png' });
-
-        // Retornar los datos recolectados hasta ahora
-        return { location };
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
     } catch (error) {
         console.error('Error durante la ejecución del scraper de Sixt:', error);
@@ -69,6 +53,7 @@ async function scrapeSixt(url, location) {
 
     } finally {
         await browser.close();
+        console.log('Browser closed.');
     }
 }
 
