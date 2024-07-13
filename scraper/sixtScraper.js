@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
-async function scrapeSixt(url, location) {
+async function scrapeSixt(url, location, startDate, endDate, startTime, endTime) {
     puppeteer.use(StealthPlugin());
 
     const browser = await puppeteer.launch({
@@ -42,7 +42,28 @@ async function scrapeSixt(url, location) {
         await page.keyboard.press('Enter'); // Suponiendo que Enter activa el botón "ACEPTO"
         console.log('Se hizo clic en el botón "ACEPTO" para aceptar todas las cookies.');
 
-        // Aquí puedes agregar el resto del código para seleccionar la localidad, etc.
+        // Esperar a que aparezca el botón de agregar ubicación y hacer clic en él
+        await page.waitForSelector('div.sc-1dv7vvc-2.buHKTE');
+        await page.click('div.sc-1dv7vvc-2.buHKTE');
+        console.log('Se hizo clic en el botón para agregar ubicación.');
+
+        // Escribir la ubicación deseada directamente en el input correcto
+        await page.waitForSelector('input[name="pickupLocation"]');
+        await page.type('input[name="pickupLocation"]', location, { delay: 100 }); // Escribir la ubicación con un retraso de 100 ms entre cada caracter
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Esperar 5 segundos para que aparezcan las opciones
+
+        // Buscar y hacer clic en la opción de ubicación deseada ("San Carlos de Bariloche")
+        const options = await page.$$('div.rs-580pqf.bWuZJx');
+        for (const option of options) {
+            const text = await option.evaluate(node => node.textContent.trim());
+            if (text === location) {
+                await option.click();
+                console.log(`Seleccionada la opción "${location}".`);
+                break;
+            }
+        }
+
+        // Aquí puedes agregar el resto del código para seleccionar la fecha, hora, etc.
         // ...
 
         await new Promise(resolve => setTimeout(resolve, 5000));
